@@ -1,0 +1,79 @@
+# -----------------------------
+# Node / Electron
+# -----------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+out/
+release/
+
+# Electron builder artifacts
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.snap
+
+# -----------------------------
+# Environment / Config
+# -----------------------------
+.env
+.env.local
+.env.*.local
+
+# -----------------------------
+# Logs
+# -----------------------------
+logs/
+*.log
+
+# -----------------------------
+# OS Files
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# IDE / Editor
+# -----------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -----------------------------
+# Local App Data
+# -----------------------------
+# Your app will store progress tracking locally — DO NOT commit this
+data/
+storage/
+*.sqlite
+*.db
+*.json
+
+# -----------------------------
+# Media Files
+# -----------------------------
+# Prevent accidentally committing large video files
+*.mp4
+*.mkv
+*.avi
+*.mov
+
+# If you use a test media folder
+media/
+videos/
+
+# -----------------------------
+# Temporary files
+# -----------------------------
+tmp/
+temp/
+.cache/
