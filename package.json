@@ -1,0 +1,24 @@
+{
+  "name": "fileflix",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">\r   <img width=\"313.5\" height=\"313.5\" alt=\"FileFlix Logo\" src=\"https://github.com/user-attachments/assets/47c3a9dc-d43d-47ba-86fd-3bd1417676d4\" />\r   <p>Turn any USB storage device into an offline streaming service</p>\r </div>\r </br>",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tyson-Shannon/FileFlix.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Tyson-Shannon/FileFlix/issues"
+  },
+  "homepage": "https://github.com/Tyson-Shannon/FileFlix#readme",
+  "devDependencies": {
+    "electron": "^41.3.0"
+  }
+}

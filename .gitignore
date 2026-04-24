@@ -51,12 +51,11 @@ Thumbs.db
 # -----------------------------
 # Local App Data
 # -----------------------------
-# Your app will store progress tracking locally — DO NOT commit this
+# Your app will store progress tracking locally
 data/
 storage/
 *.sqlite
 *.db
-*.json
 
 # -----------------------------
 # Media Files
