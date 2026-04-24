@@ -2,16 +2,26 @@
 <html>
 <head>
   <title>FileFlix</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
 </head>
 <body>
-  <h1>FileFlix</h1>
+  <div align="center">
+    <img width="313.5" height="313.5" alt="FileFlix Logo" src="./img/FileFlix Logo.png" />
+    <br>
 
-  <input type="file" id="filePicker" accept="video/*" />
+    <video id="player" controls width="800"></video>
+    <br>
 
-  <br><br>
+    <label for="filePicker" class="file-button">
+      Choose File
+    </label>
+    <input type="file" id="filePicker" webkitdirectory />  
+    <br><br>
 
-  <video id="player" controls width="800"></video>
-
+    <div id="library"></div>
+  </div>
+  
   <script src="renderer.js"></script>
 </body>
 </html>

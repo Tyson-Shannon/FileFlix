@@ -1,0 +1,91 @@
+body {
+  margin: 0;
+  background: #011633;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 20px;
+  color: #eb9f15;
+}
+
+input[type="file"] {
+  display: none;
+}
+.file-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 18px;
+  background: #eb9f15;
+  color: #011633;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+.file-button:hover {
+  background: #ffb733;
+}
+
+video {
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+#library {
+  padding: 10px;
+}
+.video-card {
+  background: #1c1c1c;
+  color: #eee;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid #333;
+}
+.video-card:hover {
+  background: #2a2a2a;
+  border-color: #eb9f15;
+  transform: translateX(4px);
+}
+
+.breadcrumb {
+  margin: 15px;
+  font-size: 14px;
+  color: #bbb;
+}
+.breadcrumb span {
+  cursor: pointer;
+  color: #eb9f15;
+}
+.breadcrumb span:hover {
+  text-decoration: underline;
+}
+.breadcrumb .sep {
+  cursor: default;
+  color: #666;
+  margin: 0 5px;
+}
+.folder-button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #1c1c1c;
+  color: #eb9f15;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border: 1px solid #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.folder-button:hover {
+  background: #2a2a2a;
+  border-color: #eb9f15;
+  transform: translateX(4px);
+}
