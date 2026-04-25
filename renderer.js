@@ -22,6 +22,17 @@ let lastSave = 0;
 
 let fileMap = {};
 
+//when episode ends play next
+player.onended = () => {
+  if (!currentFile) return;
+
+  const next = getNextEpisode(currentFile);
+
+  if (next) {
+    playFile(next);
+  }
+};
+
 //save video progress
 player.ontimeupdate = () => {
   if (!currentFile) return;
@@ -32,12 +43,25 @@ player.ontimeupdate = () => {
   }
 };
 
+
 //current folder
 function getCurrentNode() {
   let node = libraryTree;
   for (const part of currentPath) {
     node = node[part];
   }
+  return node;
+}
+
+
+function getParentNode(path) {
+  let node = libraryTree;
+
+  for (let i = 0; i < path.length - 1; i++) {
+    node = node[path[i]];
+    if (!node) return null;
+  }
+
   return node;
 }
 
@@ -93,6 +117,24 @@ function buildTreeFromPaths(paths, root) {
 }
 
 
+//play video
+function playFile(filePath) {
+  currentFile = filePath;
+
+  player.src = "file://" + filePath;
+
+  const saved = progressData[filePath];
+
+  player.onloadedmetadata = () => {
+    if (saved) {
+      player.currentTime = saved.time;
+    }
+    player.play();
+  };
+}
+
+
+//renders
 function renderView() {
   const container = document.getElementById("library");
   container.innerHTML = "";
@@ -110,18 +152,7 @@ function renderView() {
       btn.className = "video-card";
 
       btn.onclick = () => {
-        const filePath = item.file;
-        currentFile = filePath;
-        player.src = "file://" + filePath;
-        const saved = progressData[filePath];
-        const seekAndPlay = () => {
-          if (saved) player.currentTime = saved.time;
-          player.play();
-
-          player.removeEventListener("loadedmetadata", seekAndPlay);
-        };
-
-        player.addEventListener("loadedmetadata", seekAndPlay);
+        playFile(item.file);
       };
 
       section.appendChild(btn);
@@ -186,18 +217,7 @@ function renderView() {
     card.textContent = file.split(/[\\/]/).pop();
   
     card.onclick = () => {
-      currentFile = file;
-
-      player.src = "file://" + file;
-
-      const saved = progressData[file];
-
-      player.onloadedmetadata = () => {
-        if (saved) {
-          player.currentTime = saved.time;
-        }
-        player.play();
-      };
+      playFile(file);
     };
   
     container.appendChild(card);
@@ -230,4 +250,92 @@ function getContinueWatching() {
 function getNextInFolder(currentFile, files) {
   const index = files.findIndex(f => f.name === currentFile.name);
   return files[index + 1] || null;
+}
+
+
+function getNextVideo(currentFile, node) {
+  const files = node._files;
+  if (!files) return null;
+
+  const index = files.findIndex(f => f === currentFile);
+  if (index === -1) return null;
+
+  return files[index + 1] || null;
+}
+
+
+function getShowContext(filePath) {
+  const parts = filePath.split(/[\\/]/);
+
+  // Example: Show / Season 01 / Episode 01.mp4
+  const fileName = parts.pop();
+  const season = parts.pop();
+  const show = parts.pop();
+
+  return {
+    showPath: parts.join("/"),
+    show,
+    season,
+    fileName
+  };
+}
+
+
+function getAllSeasons(currentFile) {
+  const parts = currentFile.split(/[\\/]/);
+  
+  const fileName = parts.pop();
+  const seasonFolder = parts.pop();
+  const showFolder = parts.pop();
+
+  const showNode = libraryTree[showFolder];
+  if (!showNode) return [];
+
+  // collect season folders
+  const seasons = Object.keys(showNode)
+    .filter(k => k !== "_files")
+    .sort(); // Season 01, Season 02
+
+  return {
+    showNode,
+    seasons,
+    currentSeason: seasonFolder,
+    currentFile
+  };
+}
+
+
+function getNextEpisode(filePath) {
+  const node = getCurrentNode();
+  if (!node) return null;
+
+  // try next episode in same folder
+  if (node._files) {
+    const index = node._files.indexOf(filePath);
+
+    if (index !== -1 && index < node._files.length - 1) {
+      return node._files[index + 1];
+    }
+  }
+
+  // move to next folder at SAME LEVEL (season logic)
+  const parent = getParentNode(currentPath);
+  if (!parent) return null;
+
+  const folders = Object.keys(parent)
+    .filter(k => k !== "_files")
+    .sort();
+
+  const currentFolder = currentPath[currentPath.length - 1];
+  const index = folders.indexOf(currentFolder);
+
+  for (let i = index + 1; i < folders.length; i++) {
+    const nextFolder = parent[folders[i]];
+
+    if (nextFolder?._files?.length > 0) {
+      return nextFolder._files[0];
+    }
+  }
+
+  return null;
 }
