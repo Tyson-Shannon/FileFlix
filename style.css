@@ -93,3 +93,61 @@ video {
   border-color: #eb9f15;
   transform: translateX(4px);
 }
+
+.user-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+}
+/* Left side (user select) */
+.user-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.user-icon {
+  font-size: 18px;
+}
+.user-select {
+  background: #1c1c1c;
+  color: #eb9f15;
+  border: 1px solid #333;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+/* Right side (actions) */
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.user-input {
+  background: #1c1c1c;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: 140px;
+}
+/* Buttons */
+.btn {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn.add {
+  background: #eb9f15;
+  color: #000;
+}
+.btn.remove {
+  background: #333;
+  color: #000;
+}
+.btn:hover {
+  opacity: 0.85;
+}

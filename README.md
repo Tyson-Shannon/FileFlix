@@ -14,7 +14,7 @@
 
 
 ## Folder Formating Guide
-```
+```txt
 FileFlix
 |_TV
 | |_Show1
@@ -37,6 +37,7 @@ FileFlix
   |_Movie1
   | |_movie.mp4
 ```
+*Optional. Use for best results.*
 
 ## Use Cases
 1. Long flights

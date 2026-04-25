@@ -1,6 +1,6 @@
 //frontend
-const filePicker = document.getElementById('filePicker');
 const player = document.getElementById('player');
+const userSelect = document.getElementById("userSelect");
 
 window.addEventListener("DOMContentLoaded", () => {
   const openFolderBtn = document.getElementById('openFolder');
@@ -8,6 +8,27 @@ window.addEventListener("DOMContentLoaded", () => {
   openFolderBtn.addEventListener('click', () => {
     selectFolderAndLoad();
   });
+
+  const addUserBtn = document.getElementById("addUserBtn");
+  const removeUserBtn = document.getElementById("removeUserBtn");
+  const newUserInput = document.getElementById("newUserInput");
+  addUserBtn.onclick = () => {
+    const name = newUserInput.value.trim();
+    if (!name) {
+      alert("Enter a username");
+      return;
+    }
+    addUser(name);
+    newUserInput.value = ""; // clear input
+  };
+  removeUserBtn.onclick = () => {
+    removeUser(currentUser);
+  };
+});
+
+userSelect.addEventListener("change", (e) => {
+  currentUser = e.target.value;
+  renderView();
 });
 
 let libraryTree = {};
@@ -21,6 +42,8 @@ let progressData = {};
 let lastSave = 0;
 
 let fileMap = {};
+
+let currentUser = "default";
 
 //when episode ends play next
 player.onended = () => {
@@ -42,6 +65,62 @@ player.ontimeupdate = () => {
     lastSave = now;
   }
 };
+
+
+function getUserData() {
+  if (!progressData.users) progressData.users = {};
+  if (!progressData.users[currentUser]) {
+    progressData.users[currentUser] = { watchProgress: {} };
+  }
+  return progressData.users[currentUser].watchProgress;
+}
+
+
+function loadUsers() {
+  const users = Object.keys(progressData.users || {});
+
+  userSelect.innerHTML = "";
+
+  users.forEach(u => {
+    const opt = document.createElement("option");
+    opt.value = u;
+    opt.textContent = u;
+    userSelect.appendChild(opt);
+  });
+  userSelect.value = currentUser;
+}
+
+
+function addUser(username) {
+  if (!progressData.users) progressData.users = {};
+  if (progressData.users[username]) {
+    alert("User already exists");
+    return;
+  }
+  progressData.users[username] = {
+    watchProgress: {}
+  };
+  currentUser = username;
+  window.fileflixAPI.writeJSON(progressFilePath, progressData);
+  loadUsers();
+  renderView();
+}
+
+
+function removeUser(username) {
+  if (Object.keys(progressData.users).length === 1) {
+    alert("Cannot delete the last user");
+    return;
+  }
+  if (!progressData.users[username]) return;
+  if (!confirm(`Delete user "${username}"?`)) return;
+  delete progressData.users[username];
+  // fallback user
+  currentUser = Object.keys(progressData.users)[0] || "default";
+  window.fileflixAPI.writeJSON(progressFilePath, progressData);
+  loadUsers();
+  renderView();
+}
 
 
 //current folder
@@ -73,6 +152,14 @@ async function selectFolderAndLoad() {
   progressFilePath = rootFolder + "/.fileflix.json";
   // load saved progress
   progressData = window.fileflixAPI.readJSON(progressFilePath) || {};
+  // load user
+  if (!progressData.users) {
+    progressData.users = {
+      default: { watchProgress: {} }
+    };
+  }
+  currentUser = Object.keys(progressData.users)[0];
+  loadUsers();
   // scan filesystem
   const filePaths = window.fileflixAPI.scanFolder(folderPath);
   // build file map
@@ -120,17 +207,16 @@ function buildTreeFromPaths(paths, root) {
 //play video
 function playFile(filePath) {
   currentFile = filePath;
-
   player.src = "file://" + filePath;
-
-  const saved = progressData[filePath];
-
-  player.onloadedmetadata = () => {
-    if (saved) {
+  const saved = getUserData()[filePath];
+  const seekAndPlay = () => {
+    if (saved && saved.time > 0) {
       player.currentTime = saved.time;
     }
     player.play();
+    player.removeEventListener("loadeddata", seekAndPlay);
   };
+  player.addEventListener("loadeddata", seekAndPlay);
 }
 
 
@@ -229,7 +315,9 @@ function renderView() {
 function saveProgress(file, time, duration) {
   if (!progressFilePath) return;
 
-  progressData[file] = {
+  const userProgress = getUserData();
+
+  userProgress[file] = {
     time,
     duration,
     lastWatched: Date.now()
@@ -240,7 +328,8 @@ function saveProgress(file, time, duration) {
 
 
 function getContinueWatching() {
-  return Object.entries(progressData)
+  const userProgress = getUserData();
+  return Object.entries(userProgress)
     .map(([file, info]) => ({ file, ...info }))
     .sort((a, b) => b.lastWatched - a.lastWatched)
     .filter(item => item.time > 10 && item.time < item.duration - 10);
