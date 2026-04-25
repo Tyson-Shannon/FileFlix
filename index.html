@@ -3,7 +3,12 @@
 <head>
   <title>FileFlix</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+  ">
 </head>
 <body>
   <div align="center">
@@ -13,10 +18,7 @@
     <video id="player" controls width="800"></video>
     <br>
 
-    <label for="filePicker" class="file-button">
-      Choose File
-    </label>
-    <input type="file" id="filePicker" webkitdirectory />  
+    <button id="openFolder" class="file-button">Open Folder</button>  
     <br><br>
 
     <div id="library"></div>

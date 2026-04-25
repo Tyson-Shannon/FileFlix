@@ -15,3 +15,4 @@
 ## Long-Term Goals
 - [ ] Mobile version
 - [ ] Metadata and poster art support
+- [ ] Multi users for different watch history
