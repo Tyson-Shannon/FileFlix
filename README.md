@@ -11,7 +11,12 @@
 3. Allows you to jump back into a video from where you left off
 4. Your watch history follows your storage device to any device with FileFlix
 5. Auto play next episode for videos in same folder and parent folders (seasons)
+6. Save different watch data to multiple different user profiles
 
+## Screenshots
+<img width="1918" height="1137" alt="1" src="https://github.com/user-attachments/assets/3324a483-7017-4d1c-96c4-fc74f5779b80" />
+</br>
+<img width="1916" height="1140" alt="2" src="https://github.com/user-attachments/assets/fa614486-d62e-49c1-9e07-46e595950ac9" />
 
 ## Folder Formating Guide
 ```txt
