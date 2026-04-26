@@ -5,6 +5,33 @@
 </div>
 </br>
 
+## Downloads
+| System | Link |
+| :--- | :---: |
+| Windows Setup | [https://github.com/Tyson-Shannon/FileFlix/releases/download/v1.0.0/FileFlix.Setup.1.0.0.exe](https://github.com/Tyson-Shannon/FileFlix/releases/download/v1.0.0/FileFlix.Setup.1.0.0.exe) |
+| Windows Portable (USB) | [https://github.com/Tyson-Shannon/FileFlix/releases/download/v1.0.0/FileFlix.1.0.0.exe](https://github.com/Tyson-Shannon/FileFlix/releases/download/v1.0.0/FileFlix.1.0.0.exe) |
+| *Linux | [https://github.com/Tyson-Shannon/FileFlix/releases/download/v1.0.0/FileFlix-1.0.0.AppImage](https://github.com/Tyson-Shannon/FileFlix/releases/download/v1.0.0/FileFlix-1.0.0.AppImage) |
+
+</br>
+*Linux users may need to install FUSE v2
+</br>
+
+```CLI
+sudo apt update
+sudo apt install libfuse2
+```
+or
+```CLI
+sudo apt update
+sudo apt install libfuse2t64
+```
+Linux users may also have to make AppImage executable
+```CLI
+cd Downloads
+chmod +x FileFlix-1.0.0.AppImage
+./FileFlix-1.0.0.AppImage
+```
+
 ## Features
 1. Set a parent folder and view all the video files within
 2. Saves your watch history and viewing timestamps locally
