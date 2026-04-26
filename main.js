@@ -13,8 +13,8 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: true,
-      sandbox: false
+      nodeIntegration: false,
+      sandbox: true
     }
   });
   win.removeMenu();
