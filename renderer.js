@@ -45,25 +45,34 @@ let fileMap = {};
 
 let currentUser = "default";
 
+let markedComplete = false;
+
+
 //when episode ends play next
 player.onended = () => {
-  if (!currentFile) return;
+  if (!currentFile || markedComplete) return;
 
   const next = getNextEpisode(currentFile);
 
   if (next) {
     playFile(next);
+    renderView();
   }
 };
 
 //save video progress
 player.ontimeupdate = () => {
   if (!currentFile) return;
+
   const now = Date.now();
-  if (now - lastSave > 2000) { // every 2 seconds
-    saveProgress(currentFile, player.currentTime, player.duration);
-    lastSave = now;
-  }
+  if (now - lastSave < 2000) return;//every 2secs
+
+  const duration = player.duration;
+  const time = player.currentTime;
+
+  saveProgress(currentFile, time, duration);
+
+  lastSave = now;
 };
 
 
@@ -169,6 +178,7 @@ async function selectFolderAndLoad() {
   });
   // build tree
   libraryTree = buildTreeFromPaths(filePaths, folderPath);
+  sortTree(libraryTree);
   currentPath = [];
   renderView();
 }
@@ -204,9 +214,25 @@ function buildTreeFromPaths(paths, root) {
 }
 
 
+function sortTree(node) {
+  // sort files in this folder
+  if (node._files) {
+    node._files.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  }
+
+  // recursively sort subfolders
+  Object.keys(node).forEach(key => {
+    if (key !== "_files") {
+      sortTree(node[key]);
+    }
+  });
+}
+
+
 //play video
 function playFile(filePath) {
   currentFile = filePath;
+  markedComplete = false;
   player.src = "file://" + filePath;
   const saved = getUserData()[filePath];
   const seekAndPlay = () => {
@@ -312,11 +338,35 @@ function renderView() {
 }
 
 
+//video has less than 10secs left
+function isNearEnd(time, duration) {
+  return duration && (duration - time) <= 10;
+}
+
+
 function saveProgress(file, time, duration) {
   if (!progressFilePath) return;
 
   const userProgress = getUserData();
+  //if video near end
+  if (!markedComplete && isNearEnd(time, duration)) {
+    markedComplete = true;
+    delete userProgress[file]; // remove from continue watching
+    const next = getNextEpisode(file);
+    if (next && next !== file) {
+      // add next episode at time 0
+      userProgress[next] = {
+        time: 0,
+        duration: 0,
+        lastWatched: Date.now()
+      };
+    }
 
+    window.fileflixAPI.writeJSON(progressFilePath, progressData);
+    renderView();
+    return;
+  }
+  //normal save
   userProgress[file] = {
     time,
     duration,
@@ -332,7 +382,7 @@ function getContinueWatching() {
   return Object.entries(userProgress)
     .map(([file, info]) => ({ file, ...info }))
     .sort((a, b) => b.lastWatched - a.lastWatched)
-    .filter(item => item.time > 10 && item.time < item.duration - 10);
+    .filter(item => !item.duration || item.time < item.duration - 10);
 }
 
 
@@ -395,32 +445,45 @@ function getAllSeasons(currentFile) {
 
 
 function getNextEpisode(filePath) {
-  const node = getCurrentNode();
-  if (!node) return null;
+  const relative = filePath.replace(rootFolder, "").replace(/^[\\/]/, "");
+  const parts = relative.split(/[\\/]/);
 
-  // try next episode in same folder
+  let node = libraryTree;
+
+  // walk to the folder containing the file
+  for (let i = 0; i < parts.length - 1; i++) {
+    node = node[parts[i]];
+    if (!node) return null;
+  }
+
+  // same-folder next episode
   if (node._files) {
-    const index = node._files.indexOf(filePath);
+    const files = node._files;
+    const index = files.indexOf(filePath);
 
-    if (index !== -1 && index < node._files.length - 1) {
-      return node._files[index + 1];
+    if (index !== -1 && index < files.length - 1) {
+      return files[index + 1];
     }
   }
 
-  // move to next folder at SAME LEVEL (season logic)
-  const parent = getParentNode(currentPath);
-  if (!parent) return null;
+  // move up to parent folder (season logic)
+  const parentParts = parts.slice(0, -1);
+  const currentFolder = parentParts.pop();
 
-  const folders = Object.keys(parent)
+  let parentNode = libraryTree;
+  for (const part of parentParts) {
+    parentNode = parentNode[part];
+    if (!parentNode) return null;
+  }
+
+  const folders = Object.keys(parentNode)
     .filter(k => k !== "_files")
     .sort();
 
-  const currentFolder = currentPath[currentPath.length - 1];
   const index = folders.indexOf(currentFolder);
 
   for (let i = index + 1; i < folders.length; i++) {
-    const nextFolder = parent[folders[i]];
-
+    const nextFolder = parentNode[folders[i]];
     if (nextFolder?._files?.length > 0) {
       return nextFolder._files[0];
     }
