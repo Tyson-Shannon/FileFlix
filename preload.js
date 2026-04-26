@@ -3,6 +3,11 @@ const { contextBridge, ipcRenderer } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
+let configPath = null;
+ipcRenderer.invoke('get-config-path').then(p => {
+  configPath = p;
+});
+
 function scanDirectory(dir) {
   let results = [];
 
@@ -44,5 +49,41 @@ contextBridge.exposeInMainWorld('fileflixAPI', {
     }
   },
 
-  joinPath: (...args) => path.join(...args)
+  joinPath: (...args) => path.join(...args),
+
+  saveLastFolder: (folderPath) => {
+    try {
+      let config = {};
+
+      if (fs.existsSync(configPath)) {
+        config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      }
+
+      config.lastFolder = folderPath;
+
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  getLastFolder: () => {
+    try {
+      if (!fs.existsSync(configPath)) return null;
+
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      return config.lastFolder || null;
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  },
+
+  folderExists: (folderPath) => {
+    try {
+      return fs.existsSync(folderPath);
+    } catch {
+      return false;
+    }
+  }
 });

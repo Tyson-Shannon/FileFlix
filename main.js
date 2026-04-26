@@ -1,6 +1,9 @@
 //backend
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const configPath = path.join(app.getPath('userData'), 'config.json');
+
+app.setName("FileFlix");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -33,4 +36,8 @@ ipcMain.handle('select-folder', async () => {
   if (result.canceled) return null;
 
   return result.filePaths[0];
+});
+
+ipcMain.handle('get-config-path', () => {
+  return configPath;
 });

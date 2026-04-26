@@ -2,7 +2,7 @@
 const player = document.getElementById('player');
 const userSelect = document.getElementById("userSelect");
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   const openFolderBtn = document.getElementById('openFolder');
 
   openFolderBtn.addEventListener('click', () => {
@@ -24,6 +24,11 @@ window.addEventListener("DOMContentLoaded", () => {
   removeUserBtn.onclick = () => {
     removeUser(currentUser);
   };
+  //load last folder used
+  const lastFolder = window.fileflixAPI.getLastFolder();
+  if (lastFolder && window.fileflixAPI.folderExists(lastFolder)) {
+    loadFolderDirectly(lastFolder);
+  }
 });
 
 userSelect.addEventListener("change", (e) => {
@@ -157,6 +162,7 @@ function getParentNode(path) {
 async function selectFolderAndLoad() {
   const folderPath = await window.fileflixAPI.selectFolder();
   if (!folderPath) return;
+  window.fileflixAPI.saveLastFolder(folderPath);//save folder to auto launch next time
   rootFolder = folderPath;
   progressFilePath = rootFolder + "/.fileflix.json";
   // load saved progress
@@ -490,4 +496,29 @@ function getNextEpisode(filePath) {
   }
 
   return null;
+}
+
+
+async function loadFolderDirectly(folderPath) {
+  rootFolder = folderPath;
+  progressFilePath = rootFolder + "/.fileflix.json";
+
+  progressData = window.fileflixAPI.readJSON(progressFilePath) || {};
+
+  if (!progressData.users) {
+    progressData.users = {
+      default: { watchProgress: {} }
+    };
+  }
+  currentUser = Object.keys(progressData.users)[0];
+  loadUsers();
+  const filePaths = window.fileflixAPI.scanFolder(folderPath);
+  fileMap = {};
+  filePaths.forEach(fp => {
+    fileMap[fp] = fp;
+  });
+  libraryTree = buildTreeFromPaths(filePaths, folderPath);
+  sortTree(libraryTree);
+  currentPath = [];
+  renderView();
 }
